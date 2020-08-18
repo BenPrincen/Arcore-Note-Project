@@ -139,6 +139,10 @@ public class CloudAnchorActivity extends AppCompatActivity
     displayRotationHelper = new DisplayRotationHelper(this);
 
     // Set up tap listener.
+    /*
+    The tap is used to place an anchor down, once that anchor is placed
+    the app attempts to host the anchor
+     */
     gestureDetector =
         new GestureDetector(
             this,
@@ -364,6 +368,11 @@ public class CloudAnchorActivity extends AppCompatActivity
     GLES20.glViewport(0, 0, width, height);
   }
 
+
+  /*
+  main loops of the program that handles the rendering as well as updating information
+  that is used by the firebase manager and the cloud anchor manager
+   */
   @Override
   public void onDrawFrame(GL10 gl) {
     // Clear screen to notify driver it should not load any pixels from previous frame.
@@ -458,12 +467,17 @@ public class CloudAnchorActivity extends AppCompatActivity
   }
 
   /** Callback function invoked when the Host Button is pressed. */
+  /*
+  basically this assumes that if you press the host button, the app state is not in hosting mode
+  which makes sense since when you press the host button, it disappears and the only option
+  is to either cancel or to attempt to host an anchor
+   */
   private void onHostButtonPress() {
     if (currentMode == HostResolveMode.HOSTING) {
       resetMode();
       return;
     }
-
+    // if not in hosting mode then it moves to the next step to attempt to host
     if (!sharedPreferences.getBoolean(ALLOW_SHARE_IMAGES_KEY, false)) {
       showNoticeDialog(this::onPrivacyAcceptedForHost);
     } else {
@@ -475,10 +489,13 @@ public class CloudAnchorActivity extends AppCompatActivity
     if (hostListener != null) {
       return;
     }
+
+    // resolve button disappears, and host button becomes a cancel button
     resolveButton.setEnabled(false);
     hostButton.setText(R.string.cancel);
     snackbarHelper.showMessageWithDismiss(this, getString(R.string.snackbar_on_host));
 
+    // attempts to get a new room code from the firebase database for the anchor that's about to be hosted
     hostListener = new RoomCodeAndCloudAnchorIdListener();
     firebaseManager.getNewRoomCode(hostListener);
   }
@@ -542,6 +559,10 @@ public class CloudAnchorActivity extends AppCompatActivity
   /**
    * Listens for both a new room code and an anchor ID, and shares the anchor ID in Firebase with
    * the room code when both are available.
+   */
+  /*
+  class seems to be used to make sure important information like room numbers is known between
+  the firebase manager and the cloud anchor manager
    */
   private final class RoomCodeAndCloudAnchorIdListener
       implements CloudAnchorManager.CloudAnchorHostListener, FirebaseManager.RoomCodeListener {

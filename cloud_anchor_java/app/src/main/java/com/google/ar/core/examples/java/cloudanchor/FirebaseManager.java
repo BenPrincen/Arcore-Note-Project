@@ -90,6 +90,10 @@ class FirebaseManager {
    * Gets a new room code from the Firebase Database. Invokes the listener method when a new room
    * code is available.
    */
+
+  /*
+  The roomcode listener roomcode is updated in this method
+   */
   void getNewRoomCode(RoomCodeListener listener) {
     Preconditions.checkNotNull(app, "Firebase App was null");
     roomCodeRef.runTransaction(
@@ -106,6 +110,10 @@ class FirebaseManager {
             return Transaction.success(currentData);
           }
 
+          /*
+          checks if the changes were committed. if they weren't then an error is thrown.
+          otherwise roomcode stored in the listener is updated.
+           */
           @Override
           public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
             if (!committed) {
