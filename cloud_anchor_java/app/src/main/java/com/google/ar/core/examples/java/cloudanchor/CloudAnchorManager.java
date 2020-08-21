@@ -79,6 +79,11 @@ class CloudAnchorManager {
    * This method resolves an anchor. The {@code listener} will be invoked when the results are
    * available.
    */
+
+  /*
+  Adds the cloud anchor to be resolved to a map with the anchor as the key and the listener
+  as the content
+   */
   synchronized void resolveCloudAnchor(
       String anchorId, CloudAnchorResolveListener listener, long startTimeMillis) {
     Preconditions.checkNotNull(session, "The session cannot be null.");
@@ -88,6 +93,13 @@ class CloudAnchorManager {
   }
 
   /** Should be called after a {@link Session#update()} call. */
+
+  /*
+  Iterates through the list of cloud anchors to be hosted and checks their states. If they're
+  completed then they're removed from the map.
+  After, iterates through the list of cloud anchors to be resolved and once again checks their
+  state. When resolving, makes sure that the response time is within a certain range
+   */
   synchronized void onUpdate() {
     Preconditions.checkNotNull(session, "The session cannot be null.");
     Iterator<Map.Entry<Anchor, CloudAnchorHostListener>> hostIter =

@@ -561,8 +561,8 @@ public class CloudAnchorActivity extends AppCompatActivity
    * the room code when both are available.
    */
   /*
-  class seems to be used to make sure important information like room numbers is known between
-  the firebase manager and the cloud anchor manager
+  class seems to be used to make sure important information like room number, and cloud anchor id
+  is known between the firebase manager and the cloud anchor manager
    */
   private final class RoomCodeAndCloudAnchorIdListener
       implements CloudAnchorManager.CloudAnchorHostListener, FirebaseManager.RoomCodeListener {

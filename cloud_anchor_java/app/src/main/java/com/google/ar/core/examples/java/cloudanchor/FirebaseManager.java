@@ -17,6 +17,8 @@
 package com.google.ar.core.examples.java.cloudanchor;
 
 import android.content.Context;
+import android.renderscript.Sampler;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.google.common.base.Preconditions;
 import com.google.firebase.FirebaseApp;
@@ -27,6 +29,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 
 /** A helper class to manage all communications with Firebase. */
 class FirebaseManager {
@@ -54,15 +58,22 @@ class FirebaseManager {
   private static final String ROOT_FIREBASE_HOTSPOTS = "hotspot_list";
   private static final String ROOT_LAST_ROOM_CODE = "last_room_code";
 
+  // New Names of nodes used in Firebase Database
+  private static final String FIREBASE_INFO = "info"; // this is pretty much the same as the hotspot list from the sample app
+  private static final String FIREBASE_ROOMS = "rooms"; // this will contain a list of existing rooms
+
   // Some common keys and values used when writing to the Firebase Database.
   private static final String KEY_DISPLAY_NAME = "display_name";
   private static final String KEY_ANCHOR_ID = "hosted_anchor_id";
   private static final String KEY_TIMESTAMP = "updated_at_timestamp";
-  private static final String DISPLAY_NAME_VALUE = "Android EAP Sample";
+  private static final String DISPLAY_NAME_VALUE = "Benjamin Princen";
+
+  // list of existing rooms
+  private ArrayList roomList = null;
 
   private final FirebaseApp app;
-  private final DatabaseReference hotspotListRef;
-  private final DatabaseReference roomCodeRef;
+  private final DatabaseReference infoRef;
+  private final DatabaseReference roomRef;
   private DatabaseReference currentRoomRef = null;
   private ValueEventListener currentRoomListener = null;
 
@@ -75,14 +86,27 @@ class FirebaseManager {
     app = FirebaseApp.initializeApp(context);
     if (app != null) {
       DatabaseReference rootRef = FirebaseDatabase.getInstance(app).getReference();
-      hotspotListRef = rootRef.child(ROOT_FIREBASE_HOTSPOTS);
-      roomCodeRef = rootRef.child(ROOT_LAST_ROOM_CODE);
+      infoRef = rootRef.child(FIREBASE_INFO);
+      roomRef = rootRef.child(FIREBASE_ROOMS);
 
       DatabaseReference.goOnline();
+
+      // initialize room list
+      roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+          roomList = (ArrayList) dataSnapshot.getValue();
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+          Log.e("Database Room Error:", databaseError.getDetails() + ". Failed to read in room names.");
+        }
+      });
     } else {
       Log.d(TAG, "Could not connect to Firebase Database!");
-      hotspotListRef = null;
-      roomCodeRef = null;
+      infoRef = null;
+      roomRef = null;
     }
   }
 
@@ -96,7 +120,7 @@ class FirebaseManager {
    */
   void getNewRoomCode(RoomCodeListener listener) {
     Preconditions.checkNotNull(app, "Firebase App was null");
-    roomCodeRef.runTransaction(
+    roomRef.runTransaction(
         new Transaction.Handler() {
           @Override
           public Transaction.Result doTransaction(MutableData currentData) {
@@ -126,10 +150,14 @@ class FirebaseManager {
         });
   }
 
+  public ArrayList getRoomNames() {
+    return roomList;
+  }
+
   /** Stores the given anchor ID in the given room code. */
   void storeAnchorIdInRoom(Long roomCode, String cloudAnchorId) {
     Preconditions.checkNotNull(app, "Firebase App was null");
-    DatabaseReference roomRef = hotspotListRef.child(String.valueOf(roomCode));
+    DatabaseReference roomRef = infoRef.child(String.valueOf(roomCode));
     roomRef.child(KEY_DISPLAY_NAME).setValue(DISPLAY_NAME_VALUE);
     roomRef.child(KEY_ANCHOR_ID).setValue(cloudAnchorId);
     roomRef.child(KEY_TIMESTAMP).setValue(System.currentTimeMillis());
@@ -142,7 +170,7 @@ class FirebaseManager {
   void registerNewListenerForRoom(Long roomCode, CloudAnchorIdListener listener) {
     Preconditions.checkNotNull(app, "Firebase App was null");
     clearRoomListener();
-    currentRoomRef = hotspotListRef.child(String.valueOf(roomCode));
+    currentRoomRef = infoRef.child(String.valueOf(roomCode));
     currentRoomListener =
         new ValueEventListener() {
           @Override

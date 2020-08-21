@@ -27,7 +27,7 @@
   <!-- Strings in the Resolve Dialog Box -->
   <string name="resolve_dialog_ok">Resolve</string>
   <string name="resolve_dialog_title">Resolve an Anchor</string>
-  <string name="resolve_dialog_text_hint">Enter Room Code</string>
+  <string name="resolve_dialog_text_hint">Enter Room Name</string>
 
   <!-- Strings used in Snackbar messages -->
   <string name="snackbar_anchor_placed">Now hosting anchor...</string>
