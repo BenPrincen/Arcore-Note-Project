@@ -457,6 +457,7 @@ public class CloudAnchorActivity extends AppCompatActivity
     }
   }
 
+  // when host button pressed <step 1>
   /** Callback function invoked when the Host Button is pressed. */
   private void onHostButtonPress() {
     if (currentMode == HostResolveMode.HOSTING) {
@@ -475,11 +476,24 @@ public class CloudAnchorActivity extends AppCompatActivity
     if (hostListener != null) {
       return;
     }
+
+    // this is where the user should be prompted for a room name
+    // once the room name is entered then the host listener should be created
+    // with the room name <step 2>
+
     resolveButton.setEnabled(false);
     hostButton.setText(R.string.cancel);
     snackbarHelper.showMessageWithDismiss(this, getString(R.string.snackbar_on_host));
 
+    // host listener is the roomcodeandcloudanchoridlistener with the purpose of making sure
+    // that the cloudanchor manager and firebase manager both know the room code
+    // host listener should be created with the room name to make sure both the cloud anchor
+    // manager and firebase manager know the room selected
+
+    // Thus a new constructor should be created for the listener so it can be created with a room name
     hostListener = new RoomCodeAndCloudAnchorIdListener();
+
+    // this instead should be determining whether to add a new room to firebase or use an existing one
     firebaseManager.getNewRoomCode(hostListener);
   }
 
@@ -519,7 +533,14 @@ public class CloudAnchorActivity extends AppCompatActivity
   }
 
   /** Callback function invoked when the user presses the OK button in the Resolve Dialog. */
-  private void onRoomCodeEntered(Long roomCode) {
+
+  // this method should be changed when looking at changing the resolve behavior
+  // this method however should gather all the cloud anchor id's under a room
+  // and attempt to resolve them one by one
+  // methodology should be, check a cloud anchor, if resolving fails then try the next cloud anchor
+  // while pushing the previous one to the back
+  // basically it'll keep going around in a loop until all the cloud anchors are resolved
+  private void onRoomCodeEntered(String roomCode) {
     currentMode = HostResolveMode.RESOLVING;
     hostButton.setEnabled(false);
     resolveButton.setText(R.string.cancel);
@@ -543,14 +564,20 @@ public class CloudAnchorActivity extends AppCompatActivity
    * Listens for both a new room code and an anchor ID, and shares the anchor ID in Firebase with
    * the room code when both are available.
    */
+  // change this class so that the roomcode is a string
   private final class RoomCodeAndCloudAnchorIdListener
       implements CloudAnchorManager.CloudAnchorHostListener, FirebaseManager.RoomCodeListener {
 
-    private Long roomCode;
+    private String roomCode;
     private String cloudAnchorId;
 
+    public void setRoom(String room) {
+      roomCode = room;
+    }
+
+    // checkAndMaybeShare is the only method in this function that'll prob be changed
     @Override
-    public void onNewRoomCode(Long newRoomCode) {
+    public void onRoomEntered(String newRoomCode) {
       Preconditions.checkState(roomCode == null, "The room code cannot have been set before.");
       roomCode = newRoomCode;
       roomCodeText.setText(String.valueOf(roomCode));
@@ -588,6 +615,8 @@ public class CloudAnchorActivity extends AppCompatActivity
       checkAndMaybeShare();
     }
 
+    // this method probably won't change, but the storeAnchorIdInRoom probably will since the
+    // structure of the database will change
     private void checkAndMaybeShare() {
       if (roomCode == null || cloudAnchorId == null) {
         return;
@@ -600,9 +629,9 @@ public class CloudAnchorActivity extends AppCompatActivity
 
   private final class CloudAnchorResolveStateListener
       implements CloudAnchorManager.CloudAnchorResolveListener {
-    private final long roomCode;
+    private final String roomCode;
 
-    CloudAnchorResolveStateListener(long roomCode) {
+    CloudAnchorResolveStateListener(String roomCode) {
       this.roomCode = roomCode;
     }
 
