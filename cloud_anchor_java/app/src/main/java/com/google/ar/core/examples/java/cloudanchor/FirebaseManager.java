@@ -41,7 +41,7 @@ class FirebaseManager {
   interface RoomCodeListener {
 
     /** Invoked when a new room code is available from Firebase. */
-    void onNewRoomCode(Long newRoomCode);
+    void onRoomEntered(String newRoomCode);
 
     /** Invoked if a Firebase Database Error happened while fetching the room code. */
     void onError(DatabaseError error);
@@ -114,10 +114,12 @@ class FirebaseManager {
    * Gets a new room code from the Firebase Database. Invokes the listener method when a new room
    * code is available.
    */
-
   /*
   The roomcode listener roomcode is updated in this method
    */
+  // this function should instead be either adding a new room to the database or using an existing one
+  // basically this should only be called if a new room is being created otherwise it shouldn't
+  // be called <step 3>
   void getNewRoomCode(RoomCodeListener listener) {
     Preconditions.checkNotNull(app, "Firebase App was null");
     roomRef.runTransaction(
@@ -144,8 +146,8 @@ class FirebaseManager {
               listener.onError(error);
               return;
             }
-            Long roomCode = currentData.getValue(Long.class);
-            listener.onNewRoomCode(roomCode);
+            String roomCode = currentData.getValue(String.class);
+            listener.onRoomEntered(roomCode);
           }
         });
   }
@@ -155,7 +157,7 @@ class FirebaseManager {
   }
 
   /** Stores the given anchor ID in the given room code. */
-  void storeAnchorIdInRoom(Long roomCode, String cloudAnchorId) {
+  void storeAnchorIdInRoom(String roomCode, String cloudAnchorId) {
     Preconditions.checkNotNull(app, "Firebase App was null");
     DatabaseReference roomRef = infoRef.child(String.valueOf(roomCode));
     roomRef.child(KEY_DISPLAY_NAME).setValue(DISPLAY_NAME_VALUE);
@@ -167,7 +169,7 @@ class FirebaseManager {
    * Registers a new listener for the given room code. The listener is invoked whenever the data for
    * the room code is changed.
    */
-  void registerNewListenerForRoom(Long roomCode, CloudAnchorIdListener listener) {
+  void registerNewListenerForRoom(String roomCode, CloudAnchorIdListener listener) {
     Preconditions.checkNotNull(app, "Firebase App was null");
     clearRoomListener();
     currentRoomRef = infoRef.child(String.valueOf(roomCode));
@@ -193,7 +195,7 @@ class FirebaseManager {
   }
 
   /**
-   * Resets the current room listener registered using {@link #registerNewListenerForRoom(Long,
+   * Resets the current room listener registered using {@link #registerNewListenerForRoom(String,
    * CloudAnchorIdListener)}.
    */
   void clearRoomListener() {
