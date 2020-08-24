@@ -78,7 +78,7 @@ import javax.microedition.khronos.opengles.GL10;
  * anchors.
  */
 public class CloudAnchorActivity extends AppCompatActivity
-    implements GLSurfaceView.Renderer, NoticeDialogListener, InputDialog.InputDialogListener {
+    implements GLSurfaceView.Renderer, NoticeDialogListener, InputDialog.OnInputListener {
   private static final String TAG = CloudAnchorActivity.class.getSimpleName();
   private static final float[] OBJECT_COLOR = new float[] {139.0f, 195.0f, 74.0f, 255.0f};
 
@@ -691,7 +691,7 @@ public class CloudAnchorActivity extends AppCompatActivity
   }
 
   public void showInputDialog() {
-    InputDialog dialog = new InputDialog(CloudAnchorActivity.this);
+    InputDialog dialog = new InputDialog();
     dialog.show(getSupportFragmentManager(), "Input Dialog");
   }
 
