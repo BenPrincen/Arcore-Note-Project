@@ -5,12 +5,11 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
 
 public class InputDialog extends DialogFragment {
     public interface OkListener {
@@ -56,7 +55,7 @@ public class InputDialog extends DialogFragment {
     }
 
     @Override
-    public void onAttach(@NonNull Context context) {
+    public void onAttach(Context context) {
         super.onAttach(context);
         try {
             listener = (OkListener) getActivity();
