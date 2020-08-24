@@ -514,6 +514,12 @@ public class CloudAnchorActivity extends AppCompatActivity
 
     // Thus a new constructor should be created for the listener so it can be created with a room name
     hostListener = new RoomCodeAndCloudAnchorIdListener();
+    showInputDialog();
+
+    // sets the room of the listener to the room name entered into the input dialog
+    if(!EnteredRoom.isEmpty()) {
+      hostListener.setRoom(EnteredRoom);
+    }
 
     // this instead should be determining whether to add a new room to firebase or use an existing one
     firebaseManager.getNewRoomCode(hostListener);
@@ -600,6 +606,7 @@ public class CloudAnchorActivity extends AppCompatActivity
 
     public void setRoom(String room) {
       roomCode = room;
+      Log.d("TestDialog", "hostListener: set the roomcode in the RoomCodeAndCloudAnchorIdListener to " + roomCode);
     }
 
     // checkAndMaybeShare is the only method in this function that'll prob be changed
