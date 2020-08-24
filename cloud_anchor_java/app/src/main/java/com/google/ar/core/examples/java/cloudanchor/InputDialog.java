@@ -5,61 +5,66 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
+import android.text.Editable;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
+import androidx.annotation.Nullable;
 
 public class InputDialog extends DialogFragment {
-    public interface OkListener {
-        void sendInputTwo(String input);
+    private String TAG = "TestFragment";
+
+    public interface OnInputListener {
+        void sendInput(String input);
     }
 
-    private final String TAG = "TestDialog";
+    OnInputListener inputListener;
 
-    InputDialog.OkListener listener;
-    EditText textInput;
-    Context context;
+    private EditText textInput;
+    private TextView actionOk, actionCancel;
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.input_dialog, container, false);
+        textInput = view.findViewById(R.id.input);
 
-    public InputDialog(Context context) {
-        textInput = new EditText(context);
+        actionOk = view.findViewById(R.id.action_ok);
+        actionCancel = view.findViewById(R.id.action_cancel);
+        actionOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String input = textInput.getText().toString();
+                Log.d(TAG, "onClick: sending input");
+                inputListener.sendInput(input);
+                getDialog().dismiss();
+            }
+        });
+
+        actionCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: closing dialog");
+                getDialog().dismiss();
+            }
+        });
+
+        return view;
     }
+
+
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-        );
-        textInput.setLayoutParams(lp);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setView(textInput);
-        builder
-                .setTitle("Enter Room")
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        getDialog().dismiss();
-                    }
-                })
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        String input = textInput.getText().toString();
-                        listener.sendInputTwo(input);
-                        getDialog().dismiss();
-                    }
-                });
-        return builder.create();
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
+    public void onAttach(Context context) {
         super.onAttach(context);
         try {
-            listener = (OkListener) getActivity();
+            inputListener = (OnInputListener) getActivity();
         } catch(ClassCastException e) {
             Log.e(TAG, "onAttach: ClassCastException: " + e.getMessage());
         }

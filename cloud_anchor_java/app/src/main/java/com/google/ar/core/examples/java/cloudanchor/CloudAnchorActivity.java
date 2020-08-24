@@ -65,6 +65,8 @@ import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.common.base.Preconditions;
 import com.google.firebase.database.DatabaseError;
 import java.io.IOException;
+import java.util.ArrayList;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -76,9 +78,13 @@ import javax.microedition.khronos.opengles.GL10;
  * anchors.
  */
 public class CloudAnchorActivity extends AppCompatActivity
-    implements GLSurfaceView.Renderer, NoticeDialogListener {
+    implements GLSurfaceView.Renderer, NoticeDialogListener, InputDialog.InputDialogListener {
   private static final String TAG = CloudAnchorActivity.class.getSimpleName();
   private static final float[] OBJECT_COLOR = new float[] {139.0f, 195.0f, 74.0f, 255.0f};
+
+  // used in conjunction with firebase for updating information in the real time database
+  private String EnteredRoom = null;
+  private ArrayList<String> rooms = null;
 
   private enum HostResolveMode {
     NONE,
@@ -490,7 +496,7 @@ public class CloudAnchorActivity extends AppCompatActivity
     if (hostListener != null) {
       return;
     }
-    
+
     // resolve button disappears, and host button becomes a cancel button
     // this is where the user should be prompted for a room name
     // once the room name is entered then the host listener should be created
@@ -590,6 +596,7 @@ public class CloudAnchorActivity extends AppCompatActivity
 
     private String roomCode;
     private String cloudAnchorId;
+    private ArrayList<String> rooms;
 
     public void setRoom(String room) {
       roomCode = room;
@@ -683,6 +690,11 @@ public class CloudAnchorActivity extends AppCompatActivity
     }
   }
 
+  public void showInputDialog() {
+    InputDialog dialog = new InputDialog(CloudAnchorActivity.this);
+    dialog.show(getSupportFragmentManager(), "Input Dialog");
+  }
+
   public void showNoticeDialog(HostResolveListener listener) {
     DialogFragment dialog = PrivacyNoticeDialogFragment.createDialog(listener);
     dialog.show(getSupportFragmentManager(), PrivacyNoticeDialogFragment.class.getName());
@@ -694,5 +706,12 @@ public class CloudAnchorActivity extends AppCompatActivity
       throw new AssertionError("Could not save the user preference to SharedPreferences!");
     }
     createSession();
+  }
+
+  // this will get the input from the textbox in the input dialog allowing you to access that
+  // information
+  @Override
+  public void sendInput(String input) {
+
   }
 }
