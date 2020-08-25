@@ -92,17 +92,17 @@ class FirebaseManager {
       DatabaseReference.goOnline();
 
       // initialize room list
-      roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-          roomList = (ArrayList) dataSnapshot.getValue();
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-          Log.e("Database Room Error:", databaseError.getDetails() + ". Failed to read in room names.");
-        }
-      });
+//      roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//        @Override
+//        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//          roomList = (ArrayList) dataSnapshot.getValue();
+//        }
+//
+//        @Override
+//        public void onCancelled(@NonNull DatabaseError databaseError) {
+//          Log.e("Database Room Error:", databaseError.getDetails() + ". Failed to read in room names.");
+//        }
+//      });
     } else {
       Log.d(TAG, "Could not connect to Firebase Database!");
       infoRef = null;
@@ -122,34 +122,34 @@ class FirebaseManager {
   // be called <step 3>
   void getNewRoomCode(RoomCodeListener listener) {
     Preconditions.checkNotNull(app, "Firebase App was null");
-    roomRef.runTransaction(
-        new Transaction.Handler() {
-          @Override
-          public Transaction.Result doTransaction(MutableData currentData) {
-            Long nextCode = Long.valueOf(1);
-            Object currVal = currentData.getValue();
-            if (currVal != null) {
-              Long lastCode = Long.valueOf(currVal.toString());
-              nextCode = lastCode + 1;
-            }
-            currentData.setValue(nextCode);
-            return Transaction.success(currentData);
-          }
-
-          /*
-          checks if the changes were committed. if they weren't then an error is thrown.
-          otherwise roomcode stored in the listener is updated.
-           */
-          @Override
-          public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
-            if (!committed) {
-              listener.onError(error);
-              return;
-            }
-            String roomCode = currentData.getValue(String.class);
-            listener.onRoomEntered(roomCode);
-          }
-        });
+//    roomRef.runTransaction(
+//        new Transaction.Handler() {
+//          @Override
+//          public Transaction.Result doTransaction(MutableData currentData) {
+//            Long nextCode = Long.valueOf(1);
+//            Object currVal = currentData.getValue();
+//            if (currVal != null) {
+//              Long lastCode = Long.valueOf(currVal.toString());
+//              nextCode = lastCode + 1;
+//            }
+//            currentData.setValue(nextCode);
+//            return Transaction.success(currentData);
+//          }
+//
+//          /*
+//          checks if the changes were committed. if they weren't then an error is thrown.
+//          otherwise roomcode stored in the listener is updated.
+//           */
+//          @Override
+//          public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
+//            if (!committed) {
+//              listener.onError(error);
+//              return;
+//            }
+//            String roomCode = currentData.getValue(String.class);
+//            listener.onRoomEntered(roomCode);
+//          }
+//        });
   }
 
   public ArrayList getRoomNames() {

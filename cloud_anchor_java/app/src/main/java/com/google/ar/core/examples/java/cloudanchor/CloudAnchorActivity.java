@@ -517,7 +517,7 @@ public class CloudAnchorActivity extends AppCompatActivity
     showInputDialog();
 
     // sets the room of the listener to the room name entered into the input dialog
-    if(!EnteredRoom.isEmpty()) {
+    if(EnteredRoom != null && !EnteredRoom.isEmpty()) {
       hostListener.setRoom(EnteredRoom);
     }
 
@@ -719,6 +719,6 @@ public class CloudAnchorActivity extends AppCompatActivity
   // information
   @Override
   public void sendInput(String input) {
-
+    EnteredRoom = input;
   }
 }
